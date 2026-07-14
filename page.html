@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Cek Harga & Promo · FHPIM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .card {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 20, 40, 0.25);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .brand h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .brand h1 i {
+            color: #2a7faa;
+            font-size: 1.4rem;
+            background: rgba(42, 127, 170, 0.12);
+            padding: 0.3rem 0.5rem;
+            border-radius: 1.2rem;
+        }
+
+        .brand .tagline {
+            background: #d4e5f0;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #1a4b63;
+            white-space: nowrap;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .menu-item {
+            background: white;
+            padding: 1.2rem 1rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 80px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .menu-item:active {
+            transform: scale(0.97);
+        }
+
+        .menu-item .left {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            min-width: 0;
+        }
+
+        .menu-item .icon-circle {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            background: #e6f0f8;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #1e6a8f;
+            flex-shrink: 0;
+        }
+
+        .menu-item .info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0b2b3f;
+            line-height: 1.2;
+        }
+
+        .menu-item .info p {
+            font-size: 0.75rem;
+            color: #3f627b;
+            margin-top: 0.1rem;
+            line-height: 1.2;
+        }
+
+        .menu-item .badge {
+            background: #eef6fb;
+            padding: 0.3rem 0.9rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.65rem;
+            color: #1c5a7a;
+            border: 1px solid #d2e4f0;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .featured-section {
+            background: linear-gradient(145deg, #1d5d7a, #134256);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            color: white;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .featured-section .text h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .featured-section .text p {
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+
+        .featured-section .btn-featured {
+            background: white;
+            color: #134256;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .featured-section .btn-featured:active {
+            transform: scale(0.95);
+        }
+
+        .footer-note {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #4b718a;
+            border-top: 1px solid rgba(100, 140, 170, 0.15);
+            padding-top: 1.2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-note span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .footer-note span i {
+            color: #2a7faa;
+        }
+
+        /* Tombol hapus menu cek exp (tersembunyi di UI, hanya fungsi) */
+        .hidden-action {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 0.8rem; }
+            .card { padding: 1.2rem; border-radius: 1.5rem; }
+            .brand h1 { font-size: 1.4rem; }
+            .menu-grid { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 0.8rem; 
+            }
+            .menu-item { padding: 0.9rem 0.8rem; min-height: 70px; border-radius: 1.2rem; }
+            .menu-item .icon-circle { width: 42px; height: 42px; min-width: 42px; font-size: 1.2rem; }
+            .menu-item .info h3 { font-size: 0.95rem; }
+            .featured-section { padding: 1.2rem; flex-direction: column; text-align: center; }
+            .featured-section .btn-featured { width: 100%; justify-content: center; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 0.5rem; }
+            .card { padding: 0.9rem; border-radius: 1.2rem; }
+            .brand { margin-bottom: 1.2rem; gap: 0.5rem; }
+            .brand h1 { font-size: 1.2rem; }
+            .brand h1 i { font-size: 1rem; padding: 0.2rem 0.4rem; }
+            .brand .tagline { font-size: 0.65rem; padding: 0.25rem 0.7rem; }
+            .menu-grid { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 0.6rem; 
+                margin-bottom: 1.2rem; 
+            }
+            .menu-item { padding: 0.7rem 0.6rem; min-height: 60px; border-radius: 1rem; }
+            .menu-item .left { gap: 0.5rem; }
+            .menu-item .icon-circle { width: 36px; height: 36px; min-width: 36px; font-size: 1rem; border-radius: 25px; }
+            .menu-item .info h3 { font-size: 0.85rem; }
+            .menu-item .info p { font-size: 0.6rem; }
+            .menu-item .badge { font-size: 0.55rem; padding: 0.2rem 0.6rem; }
+            .featured-section { padding: 1rem; border-radius: 1.2rem; }
+            .featured-section .text h3 { font-size: 0.95rem; }
+            .featured-section .text p { font-size: 0.7rem; }
+            .featured-section .btn-featured { font-size: 0.8rem; padding: 0.5rem 1rem; }
+        }
+
+        @media (max-width: 360px) {
+            .brand h1 { font-size: 1rem; }
+            .menu-item .info h3 { font-size: 0.75rem; }
+            .menu-item .icon-circle { width: 32px; height: 32px; min-width: 32px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- HEADER -->
+        <div class="brand">
+            <h1>
+                <i class="fas fa-tag"></i> 
+                FHPIM
+            </h1>
+            <span class="tagline"><i class="fas fa-bolt" style="margin-right: 4px;"></i> update harian</span>
+        </div>
+
+        <!-- MENU GRID: Cek Harga + Cek Promo + (Cek Exp dihapus) -->
+        <div class="menu-grid">
+            <!-- Cek Harga mengarah ke scan.html -->
+            <a href="stock.html" class="menu-item">
+                <div class="left">
+                    <div class="icon-circle">
+                        <i class="fas fa-search-dollar"></i>
+                    </div>
+                    <div class="info">
+                        <h3>Cek Stock</h3>
+                        <p>Menu Untuk Cek Stock </p>
+                    </div>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-arrow-right" style="margin-right: 4px;"></i> scan
+                </div>
+            </a>
+
+            <!-- Cek Promo mengarah ke promo.html -->
+            <a href="promo.html" class="menu-item">
+                <div class="left">
+                    <div class="icon-circle">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="info">
+                        <h3>Cek Promo</h3>
+                        <p>Diskon · bundle · voucher</p>
+                    </div>
+                </div>
+                <div class="badge">
+                    <i class="fas fa-arrow-right" style="margin-right: 4px;"></i> lihat
+                </div>
+            </a>
+
+            <!-- Cek Exp dihapus (tidak tampil) -->
+            <!-- Hanya dua menu yang tersisa -->
+        </div>
+
+        <!-- FEATURED SECTION: Info Scan -->
+        <div class="featured-section">
+            <div class="text">
+                <h3><i class="fas fa-camera"></i> Scan Barcode</h3>
+                <p>Scan barcode produk untuk membuat SL dan SL Promo</p>
+            </div>
+            <a href="scan.html" class="btn-featured">
+                <i class="fas fa-camera"></i> Mulai Scan
+            </a>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-note">
+            <span><i class="fas fa-shield-alt"></i> FHPIM</span>
+            <span><i class="fas fa-shield-alt"></i> Ryan</span>
+        </div>
+    </div>
+
+    <script>
+        // Tidak ada script khusus untuk halaman utama
+        // Menu "Cek Exp" telah dihapus dari tampilan
+        console.log('FHPIM - Halaman Utama (menu cek exp dihapus)');
+    </script>
+</body>
+</html>

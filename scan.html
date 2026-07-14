@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Scan Harga · FHPIM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header h1 i {
+            color: #2a7faa;
+        }
+
+        .back-btn {
+            background: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1a4b63;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.08);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.2s;
+            text-decoration: none;
+            color: #0b2b3f;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Scanner Card */
+        .scanner-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 20, 30, 0.08);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .scanner-header h2 {
+            font-size: 1.2rem;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scanner-header .status {
+            font-size: 0.75rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #reader {
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #000;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .scanner-controls button {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .scanner-controls button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-start {
+            background: #1d5d7a;
+            color: white;
+        }
+
+        .btn-stop {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-flash {
+            background: #f39c12;
+            color: white;
+        }
+
+        /* Hasil Scan */
+        .scan-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f2f8fe;
+            border-radius: 1rem;
+            display: none;
+        }
+
+        .scan-result.show {
+            display: block;
+        }
+
+        .scan-result .result-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #0b2b3f;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .scan-result .barcode-display {
+            background: white;
+            padding: 0.8rem;
+            border-radius: 0.6rem;
+            font-family: monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 0.8rem;
+            border: 2px solid #d8e6f2;
+            word-break: break-all;
+        }
+
+        .scan-result .input-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .scan-result .input-group input {
+            flex: 2;
+            min-width: 100px;
+            padding: 0.7rem;
+            border: 2px solid #d8e6f2;
+            border-radius: 0.8rem;
+            font-size: 1rem;
+        }
+
+        .scan-result .input-group button {
+            flex: 1;
+            min-width: 80px;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-confirm {
+            background: #1d5d7a;
+            color: white;
+        }
+
+        .btn-confirm:active {
+            transform: scale(0.95);
+        }
+
+        .btn-rescan {
+            background: #eef6fb;
+            color: #1d5d7a;
+        }
+
+        .btn-rescan:active {
+            transform: scale(0.95);
+        }
+
+        /* Daftar Hasil Scan */
+        .list-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 20, 30, 0.08);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .list-header h3 {
+            font-size: 1rem;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .list-header h3 span {
+            background: #1d5d7a;
+            color: white;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .list-actions button {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .list-actions button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-csv { background: #2a7faa; color: white; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-clear { background: #eef6fb; color: #1d5d7a; }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .table-wrap th {
+            text-align: left;
+            padding: 0.6rem 0.4rem;
+            border-bottom: 2px solid #d8e6f2;
+            color: #1a4b63;
+            font-weight: 700;
+        }
+
+        .table-wrap td {
+            padding: 0.5rem 0.4rem;
+            border-bottom: 1px solid #eef6fb;
+            color: #0b2b3f;
+            font-family: monospace;
+        }
+
+        .table-wrap .delete-btn {
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.9rem;
+            background: none;
+            border: none;
+            padding: 0.2rem 0.4rem;
+            transition: 0.2s;
+        }
+
+        .table-wrap .delete-btn:active {
+            transform: scale(0.9);
+        }
+
+        .empty-list {
+            text-align: center;
+            padding: 2rem;
+            color: #8aaec4;
+            font-size: 0.9rem;
+        }
+
+        .empty-list i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .footer-note {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #4b718a;
+            border-top: 1px solid rgba(100, 140, 170, 0.15);
+            padding-top: 1.2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-note span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .footer-note span i {
+            color: #2a7faa;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body { padding: 0.8rem; }
+            .header h1 { font-size: 1.2rem; }
+            .back-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+            .scanner-card { padding: 1rem; }
+            #reader { min-height: 200px; }
+            .scanner-controls button { min-width: 80px; font-size: 0.8rem; padding: 0.6rem; }
+            .scan-result .input-group input { font-size: 0.9rem; }
+            .table-wrap table { font-size: 0.7rem; }
+            .table-wrap th, .table-wrap td { padding: 0.3rem 0.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-camera"></i> Scan Harga
+            </h1>
+            <a href="page.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+
+        <!-- Scanner -->
+        <div class="scanner-card">
+            <div class="scanner-header">
+                <h2><i class="fas fa-qrcode"></i> Pemindai Barcode</h2>
+                <span class="status inactive" id="scanStatus">● Tidak Aktif</span>
+            </div>
+
+            <div id="reader"></div>
+
+            <div class="scanner-controls">
+                <button class="btn-start" id="startScanBtn">
+                    <i class="fas fa-play"></i> Mulai
+                </button>
+                <button class="btn-stop" id="stopScanBtn">
+                    <i class="fas fa-stop"></i> Berhenti
+                </button>
+                <button class="btn-flash" id="flashBtn">
+                    <i class="fas fa-bolt"></i> Flash 
+                </button>
+            </div>
+
+            <!-- Hasil Scan -->
+            <div class="scan-result" id="scanResult">
+                <span class="result-label"><i class="fas fa-barcode"></i> Hasil Scan:</span>
+                <div class="barcode-display" id="barcodeDisplay">-</div>
+                <div class="input-group">
+                    <input type="number" id="qtyInput" placeholder="Jumlah (Qty)" min="1" value="1">
+                    <button class="btn-confirm" id="confirmBtn">
+                        <i class="fas fa-check"></i> Simpan
+                    </button>
+                    <button class="btn-rescan" id="rescanBtn">
+                        <i class="fas fa-redo"></i> Scan Lagi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daftar Hasil Scan -->
+        <div class="list-card">
+            <div class="list-header">
+                <h3>
+                    <i class="fas fa-list"></i> Daftar Scan
+                    <span id="totalCount">0</span>
+                </h3>
+                <div class="list-actions">
+                    <button class="btn-csv" id="exportCsvBtn"><i class="fas fa-file-csv"></i> CSV</button>
+                    <button class="btn-wa" id="shareWaBtn"><i class="fab fa-whatsapp"></i> WA</button>
+                    <button class="btn-clear" id="clearListBtn"><i class="fas fa-trash"></i> Hapus</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <div id="emptyList" class="empty-list">
+                    <i class="fas fa-camera"></i>
+                    Belum ada data scan<br>
+                    <small>Scan barcode untuk menambahkan</small>
+                </div>
+                <table id="scanTable" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Barcode</th>
+                            <th>Qty</th>
+                            <th style="text-align:center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scanTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-note">
+            <span><i class="fas fa-shield-alt"></i> FHPIM</span>
+            <span><i class="fas fa-shield-alt"></i> Ryan</span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ===== DATA STORE =====
+            let scanData = [];
+            let idCounter = 0;
+
+            // ===== DOM ELEMENTS =====
+            const reader = document.getElementById('reader');
+            const startBtn = document.getElementById('startScanBtn');
+            const stopBtn = document.getElementById('stopScanBtn');
+            const flashBtn = document.getElementById('flashBtn');
+            const scanStatus = document.getElementById('scanStatus');
+            const scanResult = document.getElementById('scanResult');
+            const barcodeDisplay = document.getElementById('barcodeDisplay');
+            const qtyInput = document.getElementById('qtyInput');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const rescanBtn = document.getElementById('rescanBtn');
+            const scanTableBody = document.getElementById('scanTableBody');
+            const scanTable = document.getElementById('scanTable');
+            const emptyList = document.getElementById('emptyList');
+            const totalCount = document.getElementById('totalCount');
+            const exportCsvBtn = document.getElementById('exportCsvBtn');
+            const shareWaBtn = document.getElementById('shareWaBtn');
+            const clearListBtn = document.getElementById('clearListBtn');
+
+            let html5QrCode = null;
+            let isScanning = false;
+            let lastScannedCode = null;
+
+            // ===== RENDER TABLE =====
+            function renderTable() {
+                scanTableBody.innerHTML = '';
+                if (scanData.length === 0) {
+                    scanTable.style.display = 'none';
+                    emptyList.style.display = 'block';
+                    totalCount.textContent = '0';
+                    return;
+                }
+
+                scanTable.style.display = 'table';
+                emptyList.style.display = 'none';
+                totalCount.textContent = scanData.length;
+
+                scanData.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${item.barcode}</td>
+                        <td>${item.qty}</td>
+                        <td style="text-align:center;">
+                            <button class="delete-btn" data-id="${item.id}" title="Hapus">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    `;
+                    scanTableBody.appendChild(tr);
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.dataset.id);
+                        deleteItem(id);
+                    });
+                });
+            }
+
+            // ===== CRUD =====
+            function addItem(barcode, qty) {
+                const existing = scanData.find(item => item.barcode === barcode);
+                if (existing) {
+                    existing.qty = parseInt(existing.qty) + parseInt(qty);
+                } else {
+                    scanData.push({
+                        id: ++idCounter,
+                        barcode: barcode,
+                        qty: parseInt(qty)
+                    });
+                }
+                renderTable();
+                saveToLocalStorage();
+            }
+
+            function deleteItem(id) {
+                if (confirm('Hapus item ini?')) {
+                    scanData = scanData.filter(item => item.id !== id);
+                    renderTable();
+                    saveToLocalStorage();
+                }
+            }
+
+            function clearAll() {
+                if (scanData.length === 0) return;
+                if (confirm('Hapus semua data?')) {
+                    scanData = [];
+                    idCounter = 0;
+                    renderTable();
+                    saveToLocalStorage();
+                }
+            }
+
+            // ===== LOCAL STORAGE =====
+            function saveToLocalStorage() {
+                try {
+                    localStorage.setItem('scanDataHarga', JSON.stringify(scanData));
+                    localStorage.setItem('idCounterHarga', idCounter.toString());
+                } catch (e) {
+                    console.warn('Gagal simpan ke localStorage:', e);
+                }
+            }
+
+            function loadFromLocalStorage() {
+                try {
+                    const saved = localStorage.getItem('scanDataHarga');
+                    const savedId = localStorage.getItem('idCounterHarga');
+                    if (saved) {
+                        scanData = JSON.parse(saved);
+                    }
+                    if (savedId) {
+                        idCounter = parseInt(savedId);
+                    }
+                    renderTable();
+                } catch (e) {
+                    console.warn('Gagal load dari localStorage:', e);
+                }
+            }
+
+            // ===== SCANNER =====
+            function startScanner() {
+                if (html5QrCode) {
+                    stopScanner();
+                }
+
+                html5QrCode = new Html5Qrcode("reader");
+
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                };
+
+                html5QrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    onScanError
+                ).then(() => {
+                    isScanning = true;
+                    scanStatus.textContent = '● Aktif';
+                    scanStatus.className = 'status active';
+                }).catch(err => {
+                    console.error("Gagal buka kamera:", err);
+                    alert("Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.");
+                    scanStatus.textContent = '● Error';
+                    scanStatus.className = 'status inactive';
+                });
+            }
+
+            function stopScanner() {
+                if (html5QrCode) {
+                    try {
+                        html5QrCode.stop().then(() => {
+                            html5QrCode.clear();
+                            html5QrCode = null;
+                            isScanning = false;
+                            scanStatus.textContent = '● Tidak Aktif';
+                            scanStatus.className = 'status inactive';
+                        }).catch(() => {
+                            html5QrCode = null;
+                            isScanning = false;
+                            scanStatus.textContent = '● Tidak Aktif';
+                            scanStatus.className = 'status inactive';
+                        });
+                    } catch(e) {
+                        html5QrCode = null;
+                        isScanning = false;
+                        scanStatus.textContent = '● Tidak Aktif';
+                        scanStatus.className = 'status inactive';
+                    }
+                }
+            }
+
+            function onScanSuccess(decodedText, decodedResult) {
+                if (isScanning) {
+                    isScanning = false;
+                    stopScanner();
+
+                    lastScannedCode = decodedText;
+                    barcodeDisplay.textContent = decodedText;
+                    scanResult.classList.add('show');
+                    qtyInput.value = '1';
+                    qtyInput.focus();
+                }
+            }
+
+            function onScanError(err) {
+                // Abaikan
+            }
+
+            // ===== FLASH =====
+            function toggleFlash() {
+                if (html5QrCode) {
+                    try {
+                        const track = html5QrCode.getRunningTrack();
+                        if (track && track.getCapabilities().torch) {
+                            const current = track.getSettings().torch;
+                            track.applyConstraints({ advanced: [{ torch: !current }] });
+                            flashBtn.style.background = current ? '#f39c12' : '#2ecc71';
+                        } else {
+                            alert('Fitur lampu tidak didukung pada perangkat ini.');
+                        }
+                    } catch(e) {
+                        alert('Fitur lampu tidak tersedia.');
+                    }
+                } else {
+                    alert('Pemindai belum aktif. Mulai scan terlebih dahulu.');
+                }
+            }
+
+            // ===== EXPORT CSV =====
+            function generateCSV() {
+                if (scanData.length === 0) {
+                    alert('Tidak ada data untuk diexport!');
+                    return null;
+                }
+                const header = 'PLU|QTY';
+                const rows = scanData.map(item => `${item.barcode}|${item.qty}`);
+                return [header, ...rows].join('\n');
+            }
+
+            function exportCSV() {
+                const csv = generateCSV();
+                if (!csv) return;
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.setAttribute('download', `scan_harga_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            // ===== SHARE =====
+            function shareWhatsApp() {
+                const csv = generateCSV();
+                if (!csv) return;
+                const encoded = encodeURIComponent(csv);
+                window.open(`https://wa.me/?text=${encoded}`, '_blank');
+            }
+
+            // ===== EVENT LISTENERS =====
+            startBtn.addEventListener('click', startScanner);
+            stopBtn.addEventListener('click', stopScanner);
+            flashBtn.addEventListener('click', toggleFlash);
+
+            confirmBtn.addEventListener('click', function() {
+                const barcode = barcodeDisplay.textContent;
+                const qty = qtyInput.value || '1';
+
+                if (barcode === '-' || barcode.trim() === '') {
+                    alert('Silakan scan barcode terlebih dahulu!');
+                    return;
+                }
+
+                if (parseInt(qty) < 1 || isNaN(parseInt(qty))) {
+                    alert('Masukkan qty yang valid (minimal 1)');
+                    return;
+                }
+
+                addItem(barcode.trim(), parseInt(qty));
+                scanResult.classList.remove('show');
+                barcodeDisplay.textContent = '-';
+                lastScannedCode = null;
+
+                // Tanya mau scan lagi
+                if (confirm('Data tersimpan! Scan lagi?')) {
+                    startScanner();
+                }
+            });
+
+            rescanBtn.addEventListener('click', function() {
+                scanResult.classList.remove('show');
+                barcodeDisplay.textContent = '-';
+                lastScannedCode = null;
+                startScanner();
+            });
+
+            exportCsvBtn.addEventListener('click', exportCSV);
+            shareWaBtn.addEventListener('click', shareWhatsApp);
+            clearListBtn.addEventListener('click', clearAll);
+
+            // ===== LOAD DATA =====
+            loadFromLocalStorage();
+
+            // Auto start scan
+            setTimeout(startScanner, 500);
+
+        })();
+    </script>
+</body>
+</html>

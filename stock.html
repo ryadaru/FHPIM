@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>📦 Stock FHPIM</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SheetJS untuk baca Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- html5-qrcode untuk scan barcode -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 1.2rem 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0, 20, 40, 0.08);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-left h1 i {
+            color: #1d5d7a;
+            background: rgba(29, 93, 122, 0.12);
+            padding: 0.3rem 0.6rem;
+            border-radius: 1.2rem;
+            font-size: 1.2rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .header-right .badge-total {
+            background: #1d5d7a;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* UPLOAD SECTION */
+        .upload-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-section .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .upload-section .upload-btn-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-section .upload-btn {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-section .upload-btn:active {
+            transform: scale(0.95);
+        }
+
+        .upload-section .file-status {
+            font-size: 0.85rem;
+            color: #4b718a;
+        }
+
+        .upload-section .file-status i {
+            color: #27ae60;
+        }
+
+        .upload-section .load-online-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-section .load-online-btn:active {
+            transform: scale(0.95);
+        }
+
+        .upload-section .load-online-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* SEARCH + SCAN */
+        .search-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 0.4rem 0.4rem 0.4rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            max-width: 700px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+
+        .search-box i {
+            color: #8aaec4;
+            font-size: 1rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.7rem 0;
+            font-size: 0.95rem;
+            background: transparent;
+            color: #0b2b3f;
+            min-width: 120px;
+        }
+
+        .search-box input::placeholder {
+            color: #aac0cf;
+        }
+
+        .search-box .clear-btn {
+            background: none;
+            border: none;
+            color: #8aaec4;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .search-box .clear-btn.show {
+            display: block;
+        }
+
+        .search-box .search-icon-btn {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-box .search-icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scan-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scan-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scan-btn i {
+            font-size: 1rem;
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #4b718a;
+        }
+
+        .loading i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* STOCK TABLE */
+        .table-wrapper {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 600px;
+        }
+
+        .stock-table thead {
+            background: #f0f6fb;
+        }
+
+        .stock-table th {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            font-weight: 700;
+            color: #0b2b3f;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dce8f2;
+        }
+
+        .stock-table td {
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid #eef4f9;
+            color: #1a3d54;
+            vertical-align: middle;
+        }
+
+        .stock-table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        .stock-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .stock-table .vendor-badge {
+            background: #e6edf6;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+            color: #1d5d7a;
+        }
+
+        .stock-table .ean-code {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #0b2b3f;
+            letter-spacing: 0.5px;
+            background: #f4f8fc;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.4rem;
+            font-size: 0.85rem;
+        }
+
+        .stock-table .soh-number {
+            font-weight: 700;
+            color: #0b2b3f;
+            font-size: 1rem;
+        }
+
+        .stock-table .soh-low {
+            color: #c0392b;
+        }
+
+        .stock-table .soh-medium {
+            color: #e67e22;
+        }
+
+        .stock-table .soh-high {
+            color: #27ae60;
+        }
+
+        .stock-table .desc-text {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            padding: 1.2rem 0 0.5rem;
+        }
+
+        .pagination button {
+            padding: 0.4rem 0.9rem;
+            border: 1px solid #d8e6f2;
+            background: white;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1a4b63;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 40px;
+        }
+
+        .pagination button:active {
+            transform: scale(0.92);
+        }
+
+        .pagination button.active {
+            background: #1d5d7a;
+            color: white;
+            border-color: #1d5d7a;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            color: #4b718a;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #8aaec4;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: #c5d9e8;
+        }
+
+        .empty-state h3 {
+            color: #4b718a;
+            margin-bottom: 0.3rem;
+        }
+
+        /* SCANNER MODAL */
+        .scanner-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .scanner-overlay.active {
+            display: flex;
+        }
+
+        .scanner-box {
+            background: white;
+            border-radius: 2rem;
+            max-width: 500px;
+            width: 100%;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .scanner-box .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .scanner-box .scanner-header h3 {
+            font-size: 1.1rem;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scanner-box .scanner-header h3 i {
+            color: #27ae60;
+        }
+
+        .scanner-box .close-scanner {
+            background: #f0f4f8;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            color: #4b718a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .scanner-box .close-scanner:active {
+            transform: scale(0.9);
+        }
+
+        #reader {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        #reader video {
+            border-radius: 1rem;
+        }
+
+        .scanner-status {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #4b718a;
+        }
+
+        .scanner-status i {
+            color: #27ae60;
+            margin-right: 0.3rem;
+        }
+
+        .manual-input-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .manual-input-row input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: 1px solid #dce8f2;
+            border-radius: 1.2rem;
+            font-size: 0.9rem;
+            outline: none;
+            background: #f9fcfe;
+        }
+
+        .manual-input-row input:focus {
+            border-color: #27ae60;
+        }
+
+        .manual-input-row button {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .manual-input-row button:active {
+            transform: scale(0.95);
+        }
+
+        /* FOOTER */
+        .footer-note {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #4b718a;
+            border-top: 1px solid rgba(100, 140, 170, 0.15);
+            padding-top: 1.2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-note span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .footer-note span i {
+            color: #2a7faa;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem 1.2rem;
+                border-radius: 1.5rem;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-left h1 {
+                font-size: 1.3rem;
+            }
+
+            .header-right {
+                justify-content: space-between;
+            }
+
+            .search-box {
+                max-width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .search-box input {
+                min-width: 100px;
+            }
+
+            .upload-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stock-table {
+                font-size: 0.8rem;
+                min-width: 480px;
+            }
+
+            .stock-table th,
+            .stock-table td {
+                padding: 0.6rem 0.8rem;
+            }
+
+            .pagination button {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+                min-width: 34px;
+            }
+
+            .scanner-box {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.8rem 1rem;
+                border-radius: 1.2rem;
+            }
+
+            .header-left h1 {
+                font-size: 1.1rem;
+            }
+
+            .search-box {
+                padding: 0.2rem 0.2rem 0.2rem 0.8rem;
+                border-radius: 1.2rem;
+            }
+
+            .search-box input {
+                font-size: 0.85rem;
+                padding: 0.5rem 0;
+            }
+
+            .search-box .search-icon-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .scan-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .stock-table {
+                font-size: 0.75rem;
+                min-width: 360px;
+            }
+
+            .stock-table th,
+            .stock-table td {
+                padding: 0.4rem 0.6rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #e9f2f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b0ccdd;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8aaec4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-left">
+                <a href="page.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <h1>
+                    <i class="fas fa-boxes-stacked"></i> Stock FHPIM
+                </h1>
+            </div>
+            <div class="header-right">
+                <span class="badge-total" id="totalBadge"><i class="fas fa-database"></i> 0 item</span>
+            </div>
+        </div>
+
+        <!-- UPLOAD SECTION -->
+        <div class="upload-section">
+            <button class="load-online-btn" id="loadOnlineBtn">
+                <i class="fas fa-cloud-download-alt"></i> Muat dari GitHub
+            </button>
+            <div class="upload-btn-wrapper">
+                <button class="upload-btn"><i class="fas fa-upload"></i> Upload Excel</button>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+            </div>
+            <span class="file-status" id="fileStatus">
+                <i class="fas fa-info-circle"></i> Klik "Muat dari GitHub" atau upload file
+            </span>
+        </div>
+
+        <!-- SEARCH + SCAN -->
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari vendor, EAN, atau deskripsi..." autocomplete="off">
+                <button class="clear-btn" id="clearBtn"><i class="fas fa-times-circle"></i></button>
+                <button class="search-icon-btn" id="searchBtn"><i class="fas fa-arrow-right"></i> Cari</button>
+                <button class="scan-btn" id="scanBtn"><i class="fas fa-qrcode"></i> Scan</button>
+            </div>
+        </div>
+
+        <!-- LOADING -->
+        <div id="loadingIndicator" class="loading" style="display:none;">
+            <i class="fas fa-spinner"></i>
+            <p id="loadingText">Memuat data stock...</p>
+        </div>
+
+        <!-- TABLE -->
+        <div id="tableWrapper" class="table-wrapper" style="display:none;">
+            <table class="stock-table" id="stockTable">
+                <thead>
+                    <tr>
+                        <th>Vendor</th>
+                        <th>EAN</th>
+                        <th>Description</th>
+                        <th style="text-align:right;">SOH</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div id="paginationContainer" class="pagination" style="display:none;"></div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <i class="fas fa-inbox"></i>
+            <h3>Tidak ada data stock</h3>
+            <p>Muat data dari GitHub atau upload file Excel</p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer-note">
+            <span><i class="fas fa-barcode"></i> Scan barcode EAN</span>
+            <span><i class="fas fa-database"></i> Data dari stock.xlsx</span>
+            <span><i class="fas fa-shield-alt"></i> FHPIM</span>
+        </div>
+    </div>
+
+    <!-- ===== SCANNER MODAL ===== -->
+    <div class="scanner-overlay" id="scannerOverlay">
+        <div class="scanner-box">
+            <div class="scanner-header">
+                <h3><i class="fas fa-qrcode"></i> Scan Barcode EAN</h3>
+                <button class="close-scanner" id="closeScanner"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="reader"></div>
+            <div class="scanner-status">
+                <i class="fas fa-camera"></i> Arahkan kamera ke barcode EAN
+            </div>
+            <div class="manual-input-row">
+                <input type="text" id="manualBarcode" placeholder="Atau ketik EAN manual...">
+                <button id="manualBarcodeBtn"><i class="fas fa-arrow-right"></i> Cari</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ===== KONFIGURASI =====
+            const ITEMS_PER_PAGE = 15;
+            const EXCEL_URL = 'https://raw.githubusercontent.com/nailashafa1/fhpim/main/stock.xlsx';
+
+            // ===== STATE =====
+            let allStocks = [];
+            let filteredStocks = [];
+            let currentPage = 1;
+            let totalPages = 1;
+            let isLoading = false;
+            let html5QrCode = null;
+            let isScannerOpen = false;
+            let currentSearchKeyword = '';
+
+            // ===== DOM ELEMENTS =====
+            const loadingEl = document.getElementById('loadingIndicator');
+            const loadingText = document.getElementById('loadingText');
+            const tableWrapper = document.getElementById('tableWrapper');
+            const tableBody = document.getElementById('tableBody');
+            const paginationContainer = document.getElementById('paginationContainer');
+            const emptyState = document.getElementById('emptyState');
+            const totalBadge = document.getElementById('totalBadge');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const scanBtn = document.getElementById('scanBtn');
+            const scannerOverlay = document.getElementById('scannerOverlay');
+            const closeScanner = document.getElementById('closeScanner');
+            const manualBarcode = document.getElementById('manualBarcode');
+            const manualBarcodeBtn = document.getElementById('manualBarcodeBtn');
+            const fileInput = document.getElementById('fileInput');
+            const fileStatus = document.getElementById('fileStatus');
+            const loadOnlineBtn = document.getElementById('loadOnlineBtn');
+
+            // ===== PROSES DATA EXCEL =====
+            function processExcelData(jsonData) {
+                if (!jsonData || jsonData.length === 0) {
+                    throw new Error('Data kosong atau format tidak sesuai');
+                }
+
+                const headers = Object.keys(jsonData[0]);
+                const mapKey = (possibleNames) => {
+                    for (const name of possibleNames) {
+                        const found = headers.find(h => h.toLowerCase().includes(name.toLowerCase()));
+                        if (found) return found;
+                    }
+                    return null;
+                };
+
+                const vendorKey = mapKey(['vendor', 'supplier', 'vendorname', 'nama_vendor']);
+                const eanKey = mapKey(['ean', 'barcode', 'upc', 'code', 'kode']);
+                const descKey = mapKey(['description', 'desc', 'product', 'item', 'name', 'Deskripsi', 'nama']);
+                const sohKey = mapKey(['soh','SOH', 'stock', 'qty', 'quantity', 'onhand', 'jumlah']);
+
+                const result = jsonData.map((row, index) => {
+                    const vendor = vendorKey ? String(row[vendorKey] || '').trim() : '';
+                    const ean = eanKey ? String(row[eanKey] || '').trim() : '';
+                    const description = descKey ? String(row[descKey] || '').trim() : '';
+                    const soh = sohKey ? parseFloat(row[sohKey]) || 0 : 0;
+
+                    return {
+                        id: index + 1,
+                        vendor: vendor || '—',
+                        ean: ean || '—',
+                        description: description || '—',
+                        soh: soh
+                    };
+                });
+
+                return result;
+            }
+
+            // ===== LOAD DATA =====
+            function loadData(data, source = '') {
+                allStocks = data;
+                filteredStocks = [...allStocks];
+                updateTotalBadge();
+                renderPage(1);
+                searchInput.value = '';
+                clearBtn.classList.remove('show');
+                loadingEl.style.display = 'none';
+                tableWrapper.style.display = 'block';
+
+                if (source) {
+                    fileStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#27ae60;"></i> ${source} (${data.length} item)`;
+                }
+            }
+
+            // ===== RENDER TABLE =====
+            function renderPage(page, highlightEAN = null) {
+                if (isLoading) return;
+
+                const data = filteredStocks;
+                if (data.length === 0) {
+                    tableWrapper.style.display = 'none';
+                    paginationContainer.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+                currentPage = page;
+
+                const start = (page - 1) * ITEMS_PER_PAGE;
+                const end = Math.min(start + ITEMS_PER_PAGE, data.length);
+                const pageData = data.slice(start, end);
+
+                tableBody.innerHTML = '';
+                pageData.forEach(item => {
+                    const tr = document.createElement('tr');
+                    if (highlightEAN && item.ean === highlightEAN) {
+                        tr.style.background = '#e8f5e9';
+                        tr.style.borderLeft = '4px solid #27ae60';
+                    }
+
+                    // SOH status color
+                    let sohClass = 'soh-high';
+                    if (item.soh <= 0) sohClass = 'soh-low';
+                    else if (item.soh < 10) sohClass = 'soh-medium';
+
+                    tr.innerHTML = `
+                        <td><span class="vendor-badge">${escapeHtml(item.vendor)}</span></td>
+                        <td><span class="ean-code">${escapeHtml(item.ean)}</span></td>
+                        <td class="desc-text" title="${escapeHtml(item.description)}">${escapeHtml(item.description)}</td>
+                        <td style="text-align:right;"><span class="soh-number ${sohClass}">${formatNumber(item.soh)}</span></td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                tableWrapper.style.display = 'block';
+                renderPagination();
+                paginationContainer.style.display = 'flex';
+
+                if (highlightEAN) {
+                    const highlighted = document.querySelector('tr[style*="background"]');
+                    if (highlighted) {
+                        setTimeout(() => {
+                            highlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    }
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>`;
+
+                const pages = getPaginationRange(currentPage, totalPages);
+                for (const p of pages) {
+                    if (p === '...') {
+                        html += `<span class="page-info">…</span>`;
+                    } else {
+                        html += `<button onclick="goToPage(${p})" class="${p === currentPage ? 'active' : ''}">${p}</button>`;
+                    }
+                }
+
+                html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>`;
+
+                html += `<span class="page-info">${currentPage} / ${totalPages}</span>`;
+                paginationContainer.innerHTML = html;
+            }
+
+            function getPaginationRange(current, total) {
+                const delta = 2;
+                const range = [];
+                const rangeWithDots = [];
+                let l;
+
+                for (let i = 1; i <= total; i++) {
+                    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+                        range.push(i);
+                    }
+                }
+
+                for (const i of range) {
+                    if (l) {
+                        if (i - l === 2) {
+                            rangeWithDots.push(l + 1);
+                        } else if (i - l !== 1) {
+                            rangeWithDots.push('...');
+                        }
+                    }
+                    rangeWithDots.push(i);
+                    l = i;
+                }
+
+                return rangeWithDots;
+            }
+
+            // ===== FILTER =====
+            function applyFilters(keyword, highlightEAN = null) {
+                currentSearchKeyword = keyword || '';
+
+                if (!keyword || !keyword.trim()) {
+                    filteredStocks = [...allStocks];
+                } else {
+                    const search = keyword.toLowerCase().trim();
+                    filteredStocks = allStocks.filter(item => {
+                        const searchText = `${item.vendor} ${item.ean} ${item.description}`.toLowerCase();
+                        return searchText.includes(search);
+                    });
+                }
+
+                updateTotalBadge();
+                renderPage(1, highlightEAN);
+            }
+
+            // ===== SCAN BARCODE =====
+            function startScanner() {
+                if (isScannerOpen) return;
+                isScannerOpen = true;
+                scannerOverlay.classList.add('active');
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('Perangkat tidak mendukung akses kamera. Silakan input EAN manual.');
+                    return;
+                }
+
+                const readerElement = document.getElementById('reader');
+                readerElement.innerHTML = '';
+
+                try {
+                    html5QrCode = new Html5Qrcode("reader");
+
+                    const config = {
+                        fps: 15,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0
+                    };
+
+                    html5QrCode.start({ facingMode: "environment" },
+                        config,
+                        onScanSuccess,
+                        onScanError
+                    );
+                } catch (err) {
+                    console.error('Gagal start scanner:', err);
+                    alert('Gagal mengakses kamera. Silakan input EAN manual.');
+                    closeScannerModal();
+                }
+            }
+
+            function onScanSuccess(decodedText, decodedResult) {
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        html5QrCode.clear();
+                    }).catch(err => console.warn('Stop scanner error:', err));
+                }
+                closeScannerModal();
+
+                const ean = decodedText.trim();
+                searchByEAN(ean);
+            }
+
+            function onScanError(err) {}
+
+            function searchByEAN(ean) {
+                if (!ean) {
+                    alert('EAN kosong!');
+                    return;
+                }
+
+                const found = allStocks.filter(item => item.ean === ean);
+                if (found.length > 0) {
+                    filteredStocks = found;
+                    updateTotalBadge();
+                    renderPage(1, ean);
+                    showToast(`Ditemukan ${found.length} item untuk EAN: ${ean}`);
+                } else {
+                    const partial = allStocks.filter(item =>
+                        item.ean.toLowerCase().includes(ean.toLowerCase())
+                    );
+                    if (partial.length > 0) {
+                        filteredStocks = partial;
+                        updateTotalBadge();
+                        renderPage(1);
+                        showToast(`Ditemukan ${partial.length} item dengan EAN mengandung: ${ean}`);
+                    } else {
+                        showToast(`Tidak ditemukan item untuk EAN: ${ean}`, 'error');
+                        applyFilters('', '');
+                    }
+                }
+                searchInput.value = ean;
+                clearBtn.classList.add('show');
+            }
+
+            function closeScannerModal() {
+                if (html5QrCode) {
+                    try {
+                        html5QrCode.stop().then(() => {
+                            html5QrCode.clear();
+                        }).catch(() => {});
+                    } catch (e) {}
+                    html5QrCode = null;
+                }
+                isScannerOpen = false;
+                scannerOverlay.classList.remove('active');
+                document.getElementById('reader').innerHTML = '';
+            }
+
+            // ===== TOAST =====
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 2rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: ${type === 'error' ? '#e74c3c' : '#27ae60'};
+                    color: white;
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 1.2rem;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+                    z-index: 2000;
+                    max-width: 90%;
+                    text-align: center;
+                    animation: fadeIn 0.3s ease;
+                    border: 1px solid rgba(255,255,255,0.2);
+                `;
+                toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.4s';
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+
+            // ===== HELPER =====
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function formatNumber(num) {
+                if (num === undefined || num === null || isNaN(num)) return '0';
+                if (Number.isInteger(num)) return num.toString();
+                return num.toFixed(1);
+            }
+
+            function updateTotalBadge() {
+                const total = filteredStocks.length;
+                totalBadge.innerHTML = `<i class="fas fa-database"></i> ${total} item`;
+            }
+
+            // ===== NAVIGASI GLOBAL =====
+            window.goToPage = function(page) {
+                if (page < 1 || page > totalPages || page === currentPage) return;
+                renderPage(page);
+            };
+
+            // ===== LOAD FROM GITHUB =====
+            async function loadFromGitHub() {
+                try {
+                    isLoading = true;
+                    loadOnlineBtn.disabled = true;
+                    loadingEl.style.display = 'block';
+                    loadingText.textContent = 'Mengambil data dari GitHub...';
+                    tableWrapper.style.display = 'none';
+                    paginationContainer.style.display = 'none';
+                    emptyState.style.display = 'none';
+
+                    const response = await fetch(EXCEL_URL);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const arrayBuffer = await response.arrayBuffer();
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    const processedData = processExcelData(jsonData);
+                    if (processedData.length === 0) {
+                        throw new Error('Data tidak valid atau kosong');
+                    }
+
+                    loadData(processedData, 'Data dari GitHub (stock.xlsx)');
+                    showToast(`Berhasil memuat ${processedData.length} item stock`);
+
+                } catch (error) {
+                    console.error('Error loading from GitHub:', error);
+                    loadingEl.style.display = 'none';
+                    fileStatus.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#e74c3c;"></i> Gagal muat dari GitHub: ${error.message}`;
+                    showToast('Gagal memuat data: ' + error.message, 'error');
+
+                    emptyState.style.display = 'block';
+                    emptyState.innerHTML = `
+                        <i class="fas fa-cloud-download-alt" style="color:#e67e22;"></i>
+                        <h3>Gagal memuat data dari GitHub</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top:0.5rem; font-size:0.85rem;">
+                            <i class="fas fa-info-circle"></i> Pastikan file stock.xlsx ada di repository
+                        </p>
+                        <button onclick="location.reload()" style="margin-top:1rem; padding:0.5rem 1.5rem; background:#1d5d7a; color:white; border:none; border-radius:1rem; cursor:pointer; font-weight:600;">
+                            <i class="fas fa-redo"></i> Coba Lagi
+                        </button>
+                    `;
+                } finally {
+                    isLoading = false;
+                    loadOnlineBtn.disabled = false;
+                }
+            }
+
+            // ===== EVENT LISTENERS =====
+            // Load from GitHub
+            loadOnlineBtn.addEventListener('click', loadFromGitHub);
+
+            // Search
+            searchBtn.addEventListener('click', function() {
+                const keyword = searchInput.value;
+                applyFilters(keyword);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const keyword = searchInput.value;
+                    applyFilters(keyword);
+                }
+                if (this.value.length > 0) {
+                    clearBtn.classList.add('show');
+                } else {
+                    clearBtn.classList.remove('show');
+                }
+            });
+
+            searchInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    clearBtn.classList.add('show');
+                } else {
+                    clearBtn.classList.remove('show');
+                    applyFilters('');
+                }
+            });
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                clearBtn.classList.remove('show');
+                applyFilters('');
+                searchInput.focus();
+            });
+
+            // Scan
+            scanBtn.addEventListener('click', function() {
+                startScanner();
+            });
+
+            closeScanner.addEventListener('click', function() {
+                closeScannerModal();
+            });
+
+            scannerOverlay.addEventListener('click', function(e) {
+                if (e.target === scannerOverlay) {
+                    closeScannerModal();
+                }
+            });
+
+            manualBarcodeBtn.addEventListener('click', function() {
+                const ean = manualBarcode.value.trim();
+                if (ean) {
+                    closeScannerModal();
+                    searchByEAN(ean);
+                } else {
+                    alert('Masukkan EAN!');
+                }
+            });
+
+            manualBarcode.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const ean = this.value.trim();
+                    if (ean) {
+                        closeScannerModal();
+                        searchByEAN(ean);
+                    }
+                }
+            });
+
+            // Upload File
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                        const processedData = processExcelData(jsonData);
+                        if (processedData.length === 0) {
+                            showToast('Data tidak valid atau kosong!', 'error');
+                            return;
+                        }
+
+                        loadData(processedData, `File: ${file.name}`);
+                        showToast(`Berhasil memuat ${processedData.length} item dari ${file.name}`);
+                    } catch (error) {
+                        console.error('Error reading file:', error);
+                        showToast('Gagal membaca file: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            // ===== START =====
+            loadingEl.style.display = 'block';
+            loadingText.textContent = 'Klik "Muat dari GitHub" atau upload file Excel';
+            fileStatus.innerHTML = `<i class="fas fa-info-circle"></i> Klik "Muat dari GitHub" atau upload file`;
+
+            // Cleanup
+            window.addEventListener('beforeunload', function() {
+                if (html5QrCode) {
+                    try {
+                        html5QrCode.stop().then(() => {
+                            html5QrCode.clear();
+                        }).catch(() => {});
+                    } catch (e) {}
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
