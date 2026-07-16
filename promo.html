@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Promo FHPIM + Scan Barcode</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SheetJS untuk baca Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- html5-qrcode untuk scan barcode -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e9f2f9 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 1.2rem 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0, 20, 40, 0.08);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-left h1 i {
+            color: #e67e22;
+            background: rgba(230, 126, 34, 0.12);
+            padding: 0.3rem 0.6rem;
+            border-radius: 1.2rem;
+            font-size: 1.2rem;
+        }
+
+        .back-btn {
+            background: #eef6fb;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1a4b63;
+            border: 1px solid #d2e4f0;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #dcebf5;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .header-right .badge-total {
+            background: #1d5d7a;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-section .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .upload-section .upload-btn-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-section .upload-btn {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-section .upload-btn:active {
+            transform: scale(0.95);
+        }
+
+        .upload-section .file-status {
+            font-size: 0.85rem;
+            color: #4b718a;
+        }
+
+        .upload-section .file-status i {
+            color: #27ae60;
+        }
+
+        .upload-section .load-online-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upload-section .load-online-btn:active {
+            transform: scale(0.95);
+        }
+
+        .upload-section .load-online-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .search-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 0.4rem 0.4rem 0.4rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            max-width: 500px;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+
+        .search-box i {
+            color: #8aaec4;
+            font-size: 1rem;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0.7rem 0;
+            font-size: 0.95rem;
+            background: transparent;
+            color: #0b2b3f;
+            min-width: 120px;
+        }
+
+        .search-box input::placeholder {
+            color: #aac0cf;
+        }
+
+        .search-box .clear-btn {
+            background: none;
+            border: none;
+            color: #8aaec4;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .search-box .clear-btn.show {
+            display: block;
+        }
+
+        .search-box .search-icon-btn {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-box .search-icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scan-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scan-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scan-btn i {
+            font-size: 1rem;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .filter-section .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-section label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .filter-section label i {
+            color: #2a7faa;
+        }
+
+        .filter-section input[type="date"] {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #dce8f2;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            outline: none;
+            background: #f9fcfe;
+            color: #0b2b3f;
+            min-width: 140px;
+        }
+
+        .filter-section input[type="date"]:focus {
+            border-color: #1d5d7a;
+        }
+
+        .filter-section .filter-btn {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-section .filter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .filter-section .reset-filter-btn {
+            background: #eef6fb;
+            color: #1a4b63;
+            border: 1px solid #d2e4f0;
+            padding: 0.5rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-section .reset-filter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scanner-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .scanner-overlay.active {
+            display: flex;
+        }
+
+        .scanner-box {
+            background: white;
+            border-radius: 2rem;
+            max-width: 500px;
+            width: 100%;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .scanner-box .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .scanner-box .scanner-header h3 {
+            font-size: 1.1rem;
+            color: #0b2b3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .scanner-box .scanner-header h3 i {
+            color: #27ae60;
+        }
+
+        .scanner-box .close-scanner {
+            background: #f0f4f8;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            color: #4b718a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .scanner-box .close-scanner:active {
+            transform: scale(0.9);
+        }
+
+        #reader {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        #reader video {
+            border-radius: 1rem;
+        }
+
+        .scanner-status {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #4b718a;
+        }
+
+        .scanner-status i {
+            color: #27ae60;
+            margin-right: 0.3rem;
+        }
+
+        .manual-input-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .manual-input-row input {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: 1px solid #dce8f2;
+            border-radius: 1.2rem;
+            font-size: 0.9rem;
+            outline: none;
+            background: #f9fcfe;
+        }
+
+        .manual-input-row input:focus {
+            border-color: #27ae60;
+        }
+
+        .manual-input-row button {
+            background: #1d5d7a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .manual-input-row button:active {
+            transform: scale(0.95);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #4b718a;
+        }
+
+        .loading i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .promo-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0, 20, 30, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .promo-card:active {
+            transform: scale(0.98);
+        }
+
+        .promo-card .promo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .promo-card .promo-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0b2b3f;
+            line-height: 1.3;
+        }
+
+        .promo-card .promo-badge {
+            background: #fef3e2;
+            color: #b9770e;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid #fae4c0;
+        }
+
+        .promo-card .promo-detail {
+            font-size: 0.85rem;
+            color: #3f627b;
+            line-height: 1.4;
+        }
+
+        .promo-card .promo-detail i {
+            width: 1.2rem;
+            color: #2a7faa;
+        }
+
+        .promo-card .promo-price {
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .promo-card .price-original {
+            font-size: 0.85rem;
+            color: #8aaec4;
+            text-decoration: line-through;
+        }
+
+        .promo-card .price-discount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #e74c3c;
+        }
+
+        .promo-card .price-discount i {
+            font-size: 0.9rem;
+            margin-right: 0.2rem;
+        }
+
+        .promo-card .price-normal-only {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0b2b3f;
+        }
+
+        .promo-card .promo-dates {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: #4b718a;
+            background: #f0f6fb;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.8rem;
+            margin-top: 0.2rem;
+            flex-wrap: wrap;
+        }
+
+        .promo-card .promo-dates i {
+            margin-right: 0.3rem;
+            color: #2a7faa;
+        }
+
+        .promo-card .promo-dates .date-item {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .promo-card .promo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.3rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #eef6fb;
+            font-size: 0.7rem;
+            color: #6b8fa8;
+        }
+
+        .promo-card .promo-footer .status-normal {
+            color: #27ae60;
+        }
+
+        .promo-card.highlight {
+            border: 3px solid #27ae60;
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.25);
+            background: #f0fcf4;
+            transition: all 0.3s;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+            padding: 1rem 0;
+        }
+
+        .pagination button {
+            padding: 0.4rem 0.9rem;
+            border: 1px solid #d8e6f2;
+            background: white;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #1a4b63;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 40px;
+        }
+
+        .pagination button:active {
+            transform: scale(0.92);
+        }
+
+        .pagination button.active {
+            background: #1d5d7a;
+            color: white;
+            border-color: #1d5d7a;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            color: #4b718a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #8aaec4;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: #c5d9e8;
+        }
+
+        .empty-state h3 {
+            color: #4b718a;
+            margin-bottom: 0.3rem;
+        }
+
+        .footer-note {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #4b718a;
+            border-top: 1px solid rgba(100, 140, 170, 0.15);
+            padding-top: 1.2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-note span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .footer-note span i {
+            color: #2a7faa;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem 1.2rem;
+                border-radius: 1.5rem;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-left {
+                flex-wrap: wrap;
+            }
+
+            .header-left h1 {
+                font-size: 1.3rem;
+            }
+
+            .header-right {
+                justify-content: space-between;
+            }
+
+            .search-box {
+                max-width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .search-box input {
+                min-width: 100px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+            }
+
+            .filter-section .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-section input[type="date"] {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .upload-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .promo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pagination button {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+                min-width: 34px;
+            }
+
+            .scanner-box {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+
+            .promo-card .promo-dates {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 0.8rem 1rem;
+                border-radius: 1.2rem;
+            }
+
+            .header-left h1 {
+                font-size: 1.1rem;
+            }
+
+            .back-btn {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.7rem;
+            }
+
+            .search-box {
+                padding: 0.2rem 0.2rem 0.2rem 0.8rem;
+                border-radius: 1.2rem;
+            }
+
+            .search-box input {
+                font-size: 0.85rem;
+                padding: 0.5rem 0;
+            }
+
+            .search-box .search-icon-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .scan-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .promo-card {
+                padding: 1rem;
+            }
+
+            .promo-card .promo-title {
+                font-size: 0.9rem;
+            }
+
+            .promo-card .price-discount {
+                font-size: 1rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #e9f2f9;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b0ccdd;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8aaec4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <a href="page.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <h1>
+                    <i class="fas fa-gift"></i> Promo FHPIM
+                </h1>
+            </div>
+            <div class="header-right">
+                <span class="badge-total" id="totalBadge"><i class="fas fa-tag"></i> 0 promo</span>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <button class="load-online-btn" id="loadOnlineBtn">
+                <i class="fas fa-cloud-download-alt"></i> Muat dari GitHub
+            </button>
+            <div class="upload-btn-wrapper">
+                <button class="upload-btn"><i class="fas fa-upload"></i> Upload Excel</button>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+            </div>
+            <span class="file-status" id="fileStatus">
+                <i class="fas fa-info-circle"></i> Klik "Muat dari GitHub" atau upload file
+            </span>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari promo... (nama, kode, kategori)" autocomplete="off">
+                <button class="clear-btn" id="clearBtn"><i class="fas fa-times-circle"></i></button>
+                <button class="search-icon-btn" id="searchBtn"><i class="fas fa-arrow-right"></i> Cari</button>
+                <button class="scan-btn" id="scanBtn"><i class="fas fa-qrcode"></i> Scan</button>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-alt"></i> Start Date:</label>
+                    <input type="date" id="startDateFilter">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-check"></i> End Date:</label>
+                    <input type="date" id="endDateFilter">
+                </div>
+                <button class="filter-btn" id="filterDateBtn">
+                    <i class="fas fa-filter"></i> Filter Tanggal
+                </button>
+                <button class="reset-filter-btn" id="resetFilterBtn">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading" style="display:none;">
+            <i class="fas fa-spinner"></i>
+            <p id="loadingText">Memuat data promo...</p>
+        </div>
+
+        <div id="promoGrid" class="promo-grid" style="display:none;"></div>
+
+        <div id="paginationContainer" class="pagination" style="display:none;"></div>
+
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <i class="fas fa-inbox"></i>
+            <h3>Tidak ada promo ditemukan</h3>
+            <p>Coba kata kunci lain atau muat data dari GitHub</p>
+        </div>
+
+        <div class="footer-note">
+            <span><i class="fas fa-shield-alt"></i> FHPIM</span>
+            <span><i class="fas fa-shield-alt"></i> Ryan</span>
+            <span><i class="fas fa-database"></i> Data dari promo.xlsx</span>
+        </div>
+    </div>
+
+    <div class="scanner-overlay" id="scannerOverlay">
+        <div class="scanner-box">
+            <div class="scanner-header">
+                <h3><i class="fas fa-qrcode"></i> Scan Barcode</h3>
+                <button class="close-scanner" id="closeScanner"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="reader"></div>
+            <div class="scanner-status">
+                <i class="fas fa-camera"></i> Arahkan kamera ke barcode
+            </div>
+            <div class="manual-input-row">
+                <input type="text" id="manualBarcode" placeholder="Atau ketik kode barcode manual...">
+                <button id="manualBarcodeBtn"><i class="fas fa-arrow-right"></i> Cari</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const ITEMS_PER_PAGE = 10;
+            const EXCEL_URL = 'https://raw.githubusercontent.com/nailashafa1/fhpim/main/promo.xlsx';
+
+            let allPromos = [];
+            let filteredPromos = [];
+            let currentPage = 1;
+            let totalPages = 1;
+            let isLoading = false;
+            let html5QrCode = null;
+            let isScannerOpen = false;
+
+            const loadingEl = document.getElementById('loadingIndicator');
+            const loadingText = document.getElementById('loadingText');
+            const promoGrid = document.getElementById('promoGrid');
+            const paginationContainer = document.getElementById('paginationContainer');
+            const emptyState = document.getElementById('emptyState');
+            const totalBadge = document.getElementById('totalBadge');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const scanBtn = document.getElementById('scanBtn');
+            const scannerOverlay = document.getElementById('scannerOverlay');
+            const closeScanner = document.getElementById('closeScanner');
+            const manualBarcode = document.getElementById('manualBarcode');
+            const manualBarcodeBtn = document.getElementById('manualBarcodeBtn');
+            const startDateFilter = document.getElementById('startDateFilter');
+            const endDateFilter = document.getElementById('endDateFilter');
+            const filterDateBtn = document.getElementById('filterDateBtn');
+            const resetFilterBtn = document.getElementById('resetFilterBtn');
+            const fileInput = document.getElementById('fileInput');
+            const fileStatus = document.getElementById('fileStatus');
+            const loadOnlineBtn = document.getElementById('loadOnlineBtn');
+
+            function processExcelData(jsonData) {
+                if (!jsonData || jsonData.length === 0) {
+                    throw new Error('Data kosong atau format tidak sesuai');
+                }
+
+                const headers = Object.keys(jsonData[0]);
+                const mapKey = (possibleNames) => {
+                    for (const name of possibleNames) {
+                        const found = headers.find(h => h.toLowerCase().includes(name.toLowerCase()));
+                        if (found) return found;
+                    }
+                    return null;
+                };
+
+                const nameKey = mapKey(['nama', 'produk', 'item', 'promo', 'title', 'description', 'desc', 'plu']);
+                const codeKey = mapKey(['kode', 'code', 'plu', 'id', 'barcode']);
+                const categoryKey = mapKey(['kategori', 'category', 'jenis']);
+                const priceKey = mapKey(['harga', 'price', 'harga_normal', 'normal', 'current_price', 'current price']);
+                const discountKey = mapKey(['diskon', 'discount', 'harga_diskon', 'promo_price', 'promo']);
+                const descKey = mapKey(['deskripsi', 'desc', 'keterangan', 'detail']);
+                const startDateKey = mapKey(['start_date', 'startdate', 'tanggal_mulai', 'mulai', 'tgl_mulai', 'start']);
+                const endDateKey = mapKey(['end_date', 'enddate', 'tanggal_selesai', 'selesai', 'tgl_selesai', 'end']);
+
+                const result = jsonData.map((row, index) => {
+                    const nama = nameKey ? (row[nameKey] || 'Promo ' + (index + 1)) : ('Promo ' + (index + 1));
+                    const kode = codeKey ? String(row[codeKey] || '').trim() : '';
+                    const kategori = categoryKey ? String(row[categoryKey] || '').trim() : '';
+                    
+                    let hargaNormal = 0;
+                    let hargaDiskon = 0;
+                    let isPromo = false;
+                    
+                    if (priceKey && row[priceKey] !== undefined && row[priceKey] !== null && row[priceKey] !== '') {
+                        hargaNormal = parseFloat(row[priceKey]) || 0;
+                    }
+                    
+                    if (discountKey && row[discountKey] !== undefined && row[discountKey] !== null && row[discountKey] !== '') {
+                        hargaDiskon = parseFloat(row[discountKey]) || 0;
+                    }
+                    
+                    if (hargaDiskon > 0 && hargaNormal > 0 && hargaDiskon < hargaNormal) {
+                        isPromo = true;
+                    } else if (hargaDiskon === 0 && hargaNormal > 0) {
+                        hargaDiskon = hargaNormal;
+                        isPromo = false;
+                    } else if (hargaNormal === 0 && hargaDiskon > 0) {
+                        hargaNormal = hargaDiskon;
+                        isPromo = false;
+                    } else if (hargaNormal === 0 && hargaDiskon === 0) {
+                        hargaNormal = 0;
+                        hargaDiskon = 0;
+                        isPromo = false;
+                    }
+                    
+                    const deskripsi = descKey ? String(row[descKey] || '').trim() : '';
+
+                    let startDate = '';
+                    let endDate = '';
+                    let startDateObj = null;
+                    let endDateObj = null;
+                    let hasValidDates = false;
+
+                    if (startDateKey && row[startDateKey] !== undefined && row[startDateKey] !== null && row[startDateKey] !== '') {
+                        const rawStart = row[startDateKey];
+                        if (typeof rawStart === 'number') {
+                            const dateObj = new Date((rawStart - 25569) * 86400 * 1000);
+                            startDate = dateObj.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            });
+                            startDateObj = dateObj;
+                            hasValidDates = true;
+                        } else {
+                            startDate = String(rawStart).trim();
+                            const parsed = new Date(startDate);
+                            if (!isNaN(parsed)) {
+                                startDateObj = parsed;
+                                hasValidDates = true;
+                            }
+                        }
+                    }
+                    
+                    if (endDateKey && row[endDateKey] !== undefined && row[endDateKey] !== null && row[endDateKey] !== '') {
+                        const rawEnd = row[endDateKey];
+                        if (typeof rawEnd === 'number') {
+                            const dateObj = new Date((rawEnd - 25569) * 86400 * 1000);
+                            endDate = dateObj.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            });
+                            endDateObj = dateObj;
+                            hasValidDates = true;
+                        } else {
+                            endDate = String(rawEnd).trim();
+                            const parsed = new Date(endDate);
+                            if (!isNaN(parsed)) {
+                                endDateObj = parsed;
+                                hasValidDates = true;
+                            }
+                        }
+                    }
+
+                    return {
+                        id: index + 1,
+                        nama: String(nama).trim(),
+                        kode: kode,
+                        kategori: String(kategori).trim(),
+                        hargaNormal: hargaNormal,
+                        hargaDiskon: hargaDiskon,
+                        isPromo: isPromo,
+                        deskripsi: String(deskripsi).trim(),
+                        startDate: startDate,
+                        endDate: endDate,
+                        startDateObj: startDateObj,
+                        endDateObj: endDateObj,
+                        hasValidDates: hasValidDates,
+                        _raw: row
+                    };
+                });
+
+                return result.filter(p => p.nama && p.nama.length > 0);
+            }
+
+            function loadData(data, source = '') {
+                allPromos = data;
+                filteredPromos = [...allPromos];
+                updateTotalBadge();
+                renderPage(1);
+                searchInput.value = '';
+                clearBtn.classList.remove('show');
+                loadingEl.style.display = 'none';
+                promoGrid.style.display = 'grid';
+                
+                if (source) {
+                    fileStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#27ae60;"></i> ${source} (${data.length} data)`;
+                }
+            }
+
+            function renderPage(page, highlightKode = null) {
+                if (isLoading) return;
+
+                const data = filteredPromos;
+                if (data.length === 0) {
+                    promoGrid.style.display = 'none';
+                    paginationContainer.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
+                if (page < 1) page = 1;
+                if (page > totalPages) page = totalPages;
+                currentPage = page;
+
+                const start = (page - 1) * ITEMS_PER_PAGE;
+                const end = Math.min(start + ITEMS_PER_PAGE, data.length);
+                const pageData = data.slice(start, end);
+
+                promoGrid.innerHTML = '';
+                pageData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'promo-card';
+                    if (highlightKode && item.kode === highlightKode) {
+                        card.classList.add('highlight');
+                    }
+
+                    const diskonPersen = (item.isPromo && item.hargaNormal > 0) ?
+                        Math.round(((item.hargaNormal - item.hargaDiskon) / item.hargaNormal) * 100) :
+                        0;
+
+                    let priceHtml = '';
+                    if (item.isPromo && item.hargaNormal > 0 && item.hargaDiskon > 0) {
+                        priceHtml = `
+                            <span class="price-original">Rp ${formatRupiah(item.hargaNormal)}</span>
+                            <span class="price-discount"><i class="fas fa-fire"></i> Rp ${formatRupiah(item.hargaDiskon)}</span>
+                        `;
+                    } else if (item.hargaNormal > 0) {
+                        priceHtml = `
+                            <span class="price-normal-only">Rp ${formatRupiah(item.hargaNormal)}</span>
+                        `;
+                    } else if (item.hargaDiskon > 0) {
+                        priceHtml = `
+                            <span class="price-normal-only">Rp ${formatRupiah(item.hargaDiskon)}</span>
+                        `;
+                    }
+
+                    const badgeHtml = (item.isPromo && diskonPersen > 0) ? 
+                        `<span class="promo-badge">−${diskonPersen}%</span>` : '';
+
+                    let datesHtml = '';
+                    if (item.hasValidDates && (item.startDate || item.endDate)) {
+                        datesHtml = `
+                            <div class="promo-dates">
+                                ${item.startDate ? `<span class="date-item"><i class="fas fa-calendar-alt"></i> Mulai: ${escapeHtml(item.startDate)}</span>` : ''}
+                                ${item.endDate ? `<span class="date-item"><i class="fas fa-calendar-check"></i> Selesai: ${escapeHtml(item.endDate)}</span>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    const statusText = item.isPromo ? 'promo aktif' : 'harga normal';
+                    const statusClass = item.isPromo ? '' : 'status-normal';
+
+                    card.innerHTML = `
+                        <div class="promo-header">
+                            <div class="promo-title">${escapeHtml(item.nama)}</div>
+                            ${badgeHtml}
+                        </div>
+                        ${item.kode ? `<div class="promo-detail"><i class="fas fa-barcode"></i> ${escapeHtml(item.kode)}</div>` : ''}
+                        ${item.kategori ? `<div class="promo-detail"><i class="fas fa-tag"></i> ${escapeHtml(item.kategori)}</div>` : ''}
+                        ${item.deskripsi ? `<div class="promo-detail"><i class="fas fa-align-left"></i> ${escapeHtml(item.deskripsi)}</div>` : ''}
+                        <div class="promo-price">
+                            ${priceHtml}
+                        </div>
+                        ${datesHtml}
+                        <div class="promo-footer">
+                            <span><i class="fas fa-hashtag"></i> #${item.id}</span>
+                            <span class="${statusClass}"><i class="fas ${item.isPromo ? 'fa-clock' : 'fa-check-circle'}"></i> ${statusText}</span>
+                        </div>
+                    `;
+                    promoGrid.appendChild(card);
+                });
+
+                promoGrid.style.display = 'grid';
+                renderPagination();
+                paginationContainer.style.display = 'flex';
+
+                if (highlightKode) {
+                    const highlighted = document.querySelector('.promo-card.highlight');
+                    if (highlighted) {
+                        setTimeout(() => {
+                            highlighted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 200);
+                    }
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>`;
+
+                const pages = getPaginationRange(currentPage, totalPages);
+                for (const p of pages) {
+                    if (p === '...') {
+                        html += `<span class="page-info">…</span>`;
+                    } else {
+                        html += `<button onclick="goToPage(${p})" class="${p === currentPage ? 'active' : ''}">${p}</button>`;
+                    }
+                }
+
+                html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>`;
+
+                html += `<span class="page-info">${currentPage} / ${totalPages}</span>`;
+                paginationContainer.innerHTML = html;
+            }
+
+            function getPaginationRange(current, total) {
+                const delta = 2;
+                const range = [];
+                const rangeWithDots = [];
+                let l;
+
+                for (let i = 1; i <= total; i++) {
+                    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+                        range.push(i);
+                    }
+                }
+
+                for (const i of range) {
+                    if (l) {
+                        if (i - l === 2) {
+                            rangeWithDots.push(l + 1);
+                        } else if (i - l !== 1) {
+                            rangeWithDots.push('...');
+                        }
+                    }
+                    rangeWithDots.push(i);
+                    l = i;
+                }
+
+                return rangeWithDots;
+            }
+
+            function applyFilters(keyword, startDate, endDate, highlightKode = null) {
+                let result = [...allPromos];
+
+                if (keyword && keyword.trim()) {
+                    const search = keyword.toLowerCase().trim();
+                    result = result.filter(item => {
+                        const searchText = `${item.nama} ${item.kode} ${item.kategori} ${item.deskripsi}`.toLowerCase();
+                        return searchText.includes(search);
+                    });
+                }
+
+                if (startDate) {
+                    const startFilter = new Date(startDate);
+                    startFilter.setHours(0, 0, 0, 0);
+                    result = result.filter(item => {
+                        if (!item.startDateObj) return false;
+                        const itemDate = new Date(item.startDateObj);
+                        itemDate.setHours(0, 0, 0, 0);
+                        return itemDate >= startFilter;
+                    });
+                }
+
+                if (endDate) {
+                    const endFilter = new Date(endDate);
+                    endFilter.setHours(0, 0, 0, 0);
+                    result = result.filter(item => {
+                        if (!item.endDateObj) return false;
+                        const itemDate = new Date(item.endDateObj);
+                        itemDate.setHours(0, 0, 0, 0);
+                        return itemDate <= endFilter;
+                    });
+                }
+
+                if (startDate && endDate) {
+                    const startFilter = new Date(startDate);
+                    startFilter.setHours(0, 0, 0, 0);
+                    const endFilter = new Date(endDate);
+                    endFilter.setHours(0, 0, 0, 0);
+                    result = result.filter(item => {
+                        if (!item.startDateObj || !item.endDateObj) return false;
+                        const itemStart = new Date(item.startDateObj);
+                        itemStart.setHours(0, 0, 0, 0);
+                        const itemEnd = new Date(item.endDateObj);
+                        itemEnd.setHours(0, 0, 0, 0);
+                        return itemStart >= startFilter && itemEnd <= endFilter;
+                    });
+                }
+
+                filteredPromos = result;
+                updateTotalBadge();
+                renderPage(1, highlightKode);
+            }
+
+            function startScanner() {
+                if (isScannerOpen) return;
+                isScannerOpen = true;
+                scannerOverlay.classList.add('active');
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('Perangkat tidak mendukung akses kamera. Silakan input kode manual.');
+                    return;
+                }
+
+                const readerElement = document.getElementById('reader');
+                readerElement.innerHTML = '';
+
+                try {
+                    html5QrCode = new Html5Qrcode("reader");
+
+                    const config = {
+                        fps: 15,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0
+                    };
+
+                    html5QrCode.start({ facingMode: "environment" },
+                        config,
+                        onScanSuccess,
+                        onScanError
+                    );
+                } catch (err) {
+                    console.error('Gagal start scanner:', err);
+                    alert('Gagal mengakses kamera. Silakan input kode manual.');
+                    closeScannerModal();
+                }
+            }
+
+            function onScanSuccess(decodedText, decodedResult) {
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        html5QrCode.clear();
+                    }).catch(err => console.warn('Stop scanner error:', err));
+                }
+                closeScannerModal();
+
+                const kode = decodedText.trim();
+                searchByBarcode(kode);
+            }
+
+            function onScanError(err) {}
+
+            function searchByBarcode(kode) {
+                if (!kode) {
+                    alert('Kode barcode kosong!');
+                    return;
+                }
+
+                const found = allPromos.filter(item => item.kode === kode);
+                if (found.length > 0) {
+                    filteredPromos = found;
+                    updateTotalBadge();
+                    renderPage(1, kode);
+                    showToast(`Ditemukan ${found.length} promo untuk kode: ${kode}`);
+                } else {
+                    const partial = allPromos.filter(item =>
+                        item.kode.toLowerCase().includes(kode.toLowerCase())
+                    );
+                    if (partial.length > 0) {
+                        filteredPromos = partial;
+                        updateTotalBadge();
+                        renderPage(1);
+                        showToast(`Ditemukan ${partial.length} promo dengan kode mengandung: ${kode}`);
+                    } else {
+                        showToast(`Tidak ditemukan promo untuk kode: ${kode}`, 'error');
+                        applyFilters('', '', '');
+                    }
+                }
+                searchInput.value = kode;
+                clearBtn.classList.add('show');
+            }
+
+            function closeScannerModal() {
+                if (html5QrCode) {
+                    try {
+                        html5QrCode.stop().then(() => {
+                            html5QrCode.clear();
+                        }).catch(() => {});
+                    } catch (e) {}
+                    html5QrCode = null;
+                }
+                isScannerOpen = false;
+                scannerOverlay.classList.remove('active');
+                document.getElementById('reader').innerHTML = '';
+            }
+
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 2rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: ${type === 'error' ? '#e74c3c' : '#27ae60'};
+                    color: white;
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 1.2rem;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+                    z-index: 2000;
+                    max-width: 90%;
+                    text-align: center;
+                    animation: fadeIn 0.3s ease;
+                    border: 1px solid rgba(255,255,255,0.2);
+                `;
+                toast.innerHTML = `<i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.4s';
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function formatRupiah(angka) {
+                return new Intl.NumberFormat('id-ID').format(Math.round(angka));
+            }
+
+            function updateTotalBadge() {
+                const total = filteredPromos.length;
+                totalBadge.innerHTML = `<i class="fas fa-tag"></i> ${total} promo`;
+            }
+
+            window.goToPage = function(page) {
+                if (page < 1 || page > totalPages || page === currentPage) return;
+                renderPage(page);
+            };
+
+            async function loadFromGitHub() {
+                try {
+                    isLoading = true;
+                    loadOnlineBtn.disabled = true;
+                    loadingEl.style.display = 'block';
+                    loadingText.textContent = 'Mengambil data dari GitHub...';
+                    promoGrid.style.display = 'none';
+                    paginationContainer.style.display = 'none';
+                    emptyState.style.display = 'none';
+
+                    const response = await fetch(EXCEL_URL);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const arrayBuffer = await response.arrayBuffer();
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    const processedData = processExcelData(jsonData);
+                    if (processedData.length === 0) {
+                        throw new Error('Data tidak valid atau kosong');
+                    }
+
+                    loadData(processedData, 'Data dari GitHub (promo.xlsx)');
+                    showToast(`Berhasil memuat ${processedData.length} data dari GitHub`);
+
+                } catch (error) {
+                    console.error('Error loading from GitHub:', error);
+                    loadingEl.style.display = 'none';
+                    fileStatus.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#e74c3c;"></i> Gagal muat dari GitHub: ${error.message}`;
+                    showToast('Gagal memuat data: ' + error.message, 'error');
+                    
+                    emptyState.style.display = 'block';
+                    emptyState.innerHTML = `
+                        <i class="fas fa-cloud-download-alt" style="color:#e67e22;"></i>
+                        <h3>Gagal memuat data dari GitHub</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top:0.5rem; font-size:0.85rem;">
+                            <i class="fas fa-info-circle"></i> Pastikan file promo.xlsx ada di repository
+                        </p>
+                        <button onclick="location.reload()" style="margin-top:1rem; padding:0.5rem 1.5rem; background:#1d5d7a; color:white; border:none; border-radius:1rem; cursor:pointer; font-weight:600;">
+                            <i class="fas fa-redo"></i> Coba Lagi
+                        </button>
+                    `;
+                } finally {
+                    isLoading = false;
+                    loadOnlineBtn.disabled = false;
+                }
+            }
+
+            loadOnlineBtn.addEventListener('click', loadFromGitHub);
+
+            searchBtn.addEventListener('click', function() {
+                const keyword = searchInput.value;
+                const startDate = startDateFilter.value;
+                const endDate = endDateFilter.value;
+                applyFilters(keyword, startDate, endDate);
+            });
+
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const keyword = searchInput.value;
+                    const startDate = startDateFilter.value;
+                    const endDate = endDateFilter.value;
+                    applyFilters(keyword, startDate, endDate);
+                }
+                if (this.value.length > 0) {
+                    clearBtn.classList.add('show');
+                } else {
+                    clearBtn.classList.remove('show');
+                }
+            });
+
+            searchInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    clearBtn.classList.add('show');
+                } else {
+                    clearBtn.classList.remove('show');
+                    const startDate = startDateFilter.value;
+                    const endDate = endDateFilter.value;
+                    applyFilters('', startDate, endDate);
+                }
+            });
+
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                clearBtn.classList.remove('show');
+                const startDate = startDateFilter.value;
+                const endDate = endDateFilter.value;
+                applyFilters('', startDate, endDate);
+                searchInput.focus();
+            });
+
+            filterDateBtn.addEventListener('click', function() {
+                const keyword = searchInput.value;
+                const startDate = startDateFilter.value;
+                const endDate = endDateFilter.value;
+                applyFilters(keyword, startDate, endDate);
+            });
+
+            resetFilterBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                startDateFilter.value = '';
+                endDateFilter.value = '';
+                clearBtn.classList.remove('show');
+                applyFilters('', '', '');
+                showToast('Filter tanggal direset');
+            });
+
+            scanBtn.addEventListener('click', function() {
+                startScanner();
+            });
+
+            closeScanner.addEventListener('click', function() {
+                closeScannerModal();
+            });
+
+            scannerOverlay.addEventListener('click', function(e) {
+                if (e.target === scannerOverlay) {
+                    closeScannerModal();
+                }
+            });
+
+            manualBarcodeBtn.addEventListener('click', function() {
+                const kode = manualBarcode.value.trim();
+                if (kode) {
+                    closeScannerModal();
+                    searchByBarcode(kode);
+                } else {
+                    alert('Masukkan kode barcode!');
+                }
+            });
+
+            manualBarcode.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const kode = this.value.trim();
+                    if (kode) {
+                        closeScannerModal();
+                        searchByBarcode(kode);
+                    }
+                }
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        
+                        const processedData = processExcelData(jsonData);
+                        if (processedData.length === 0) {
+                            showToast('Data tidak valid atau kosong!', 'error');
+                            return;
+                        }
+                        
+                        loadData(processedData, `File: ${file.name}`);
+                        showToast(`Berhasil memuat ${processedData.length} data dari ${file.name}`);
+                    } catch (error) {
+                        console.error('Error reading file:', error);
+                        showToast('Gagal membaca file: ' + error.message, 'error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            loadingEl.style.display = 'block';
+            loadingText.textContent = 'Klik "Muat dari GitHub" atau upload file Excel';
+            fileStatus.innerHTML = `<i class="fas fa-info-circle"></i> Klik "Muat dari GitHub" atau upload file`;
+
+            window.addEventListener('beforeunload', function() {
+                if (html5QrCode) {
+                    try {
+                        html5QrCode.stop().then(() => {
+                            html5QrCode.clear();
+                        }).catch(() => {});
+                    } catch (e) {}
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
